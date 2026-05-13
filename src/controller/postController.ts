@@ -32,7 +32,15 @@ export const createPost = async (req: AuthRequest, res: Response) => {
     })
 
     await newPost.save()
-  } catch (err) {}
+
+     res.status(201).json({
+       message: "Post created",
+       data: newPost
+     })
+  } catch (err) {
+     console.error(err)
+     res.status(500).json({ message: "Fail to create post" })
+  }
 }
 
 // pagination
