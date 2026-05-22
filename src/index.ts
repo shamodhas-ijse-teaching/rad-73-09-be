@@ -1,3 +1,7 @@
+// Force Node to use a public DNS that handles SRV records properly
+import dns from "node:dns"
+dns.setServers(["8.8.8.8", "8.8.4.4"])
+
 import dotenv from "dotenv"
 dotenv.config()
 
@@ -38,7 +42,10 @@ mongoose
     //   console.log("Server running on port: 50000")
     // })
   })
-  .catch((err) => console.error("Fail to connect DB..!"))
+  .catch((err) => {
+    console.error("Reason:", err.message)
+    console.error("Fail to connect DB..!")
+  })
 
 app.listen(PORT, () => {
   console.log("Server running on port: ", PORT)
