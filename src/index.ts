@@ -6,6 +6,8 @@ import mongoose from "mongoose"
 import customerRoutes from "./routes/customerRoutes"
 import itemRoutes from "./routes/itemRoutes"
 import authRoutes from "./routes/authRoutes"
+import postRouter from "./routes/postRouter"
+import aiRoutes from "./routes/aiRoutes"
 import cors from "cors"
 
 const app = express()
@@ -25,6 +27,8 @@ app.use(cors())
 app.use("/api/v1/customer", customerRoutes)
 app.use("/api/v1/item", itemRoutes)
 app.use("/api/v1/auth", authRoutes)
+app.use("/api/v1/post", postRouter)
+app.use("/api/v1/ai", aiRoutes)
 
 mongoose
   .connect(MONGO_URL)

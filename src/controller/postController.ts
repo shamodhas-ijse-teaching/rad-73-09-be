@@ -33,17 +33,81 @@ export const createPost = async (req: AuthRequest, res: Response) => {
 
     await newPost.save()
 
-     res.status(201).json({
-       message: "Post created",
-       data: newPost
-     })
+    res.status(201).json({
+      message: "Post created",
+      data: newPost
+    })
   } catch (err) {
-     console.error(err)
-     res.status(500).json({ message: "Fail to create post" })
+    console.error(err)
+    res.status(500).json({ message: "Fail to create post" })
   }
 }
 
 // pagination
-export const getAllPost = (req: Request, res: Response) => {}
+// query params
+// /api/v1/post?page=1&limit=10
+// 100 , 10
+// 0, 10, 20, 30
+export const getAllPost = async (req: Request, res: Response) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1
+    const limit = parseInt(req.query.limit as string) || 10
+    // 2 = 1 * 10 = 10
+    const skip = (page - 1) * limit
 
-export const getMyPost = (req: Request, res: Response) => {}
+    console.log(req.query.page, limit)
+
+    // impliment
+    const posts = await PostModel.find() // get all
+      .populate("author", "name email") // related models data
+      .sort({ createdAt: -1 }) // change order
+      .skip(skip) // ignore data for pagination
+      .limit(limit) // data count currently need
+
+    const totalDataCount = await PostModel.countDocuments()
+
+    res.status(200).json({
+      message: "Posts data",
+      data: posts,
+      totalPage: totalDataCount / limit,
+      totalCount: totalDataCount,
+      page
+    })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: "Failed to fetch posts" })
+  }
+}
+
+// /api/v1/post?page=1&limit=10
+export const getMyPost = async (req: AuthRequest, res: Response) => {
+  // req.user.sub - userId
+  try {
+    const page = parseInt(req.query.page as string) || 1
+    const limit = parseInt(req.query.limit as string) || 10
+    // 2 = 1 * 10 = 10
+    const skip = (page - 1) * limit
+
+    // impliment
+    const posts = await PostModel.find({ author: req.user.sub }) // get all data with userID
+      .populate("author", "name email") // related models data
+      .sort({ createdAt: -1 }) // change order
+      .skip(skip) // ignore data for pagination
+      .limit(limit) // data count currently need
+
+    const totalDataCount = await PostModel.countDocuments({
+      author: req.user.sub
+    })
+
+    res.status(200).json({
+      message: "Posts data",
+      data: posts,
+      totalPage: totalDataCount / limit,
+      totalCount: totalDataCount,
+      page
+    })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: "Failed to fetch posts" })
+  }
+}
